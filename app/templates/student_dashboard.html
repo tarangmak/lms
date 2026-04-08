@@ -79,19 +79,5 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <a href="{{ url_for('index') }}" class="btn btn-primary mr-2">View All Courses</a>
-                        <a href="{{ url_for('profile', ID=session.User.ID) }}" class="btn btn-info mr-2">My Profile</a>
-                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 {% endblock content %}
