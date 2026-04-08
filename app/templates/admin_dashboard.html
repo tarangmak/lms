@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    LMS - Admin Dashboard
+{% endblock title %}
+
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">LMS - Admin</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('course_list') }}">Manage Courses</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav navbar-right">
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger" role="button">Logout</a>
+            </ul>
+        </div>
+    </nav>
+{% endblock navbar %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h1>Admin Dashboard</h1>
+                <p class="text-muted">Welcome, {{ session.User.Username }}!</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Students</h5>
+                        <h2 class="card-text text-primary">{{ total_students }}</h2>
+                        <p class="card-subtitle text-muted">Registered students</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Courses</h5>
+                        <h2 class="card-text text-success">{{ total_courses }}</h2>
+                        <p class="card-subtitle text-muted">Active courses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="{{ url_for('course_list') }}" class="btn btn-primary mr-2">Manage Courses</a>
+                        <a href="{{ url_for('user_list') }}" class="btn btn-info mr-2">Manage Users</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

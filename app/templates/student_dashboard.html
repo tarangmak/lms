@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    LMS - Student Dashboard
+{% endblock title %}
+
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">LMS - Student</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('student_dashboard') }}">Dashboard <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}">My Courses</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav navbar-right">
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger" role="button">Logout</a>
+            </ul>
+        </div>
+    </nav>
+{% endblock navbar %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h1>Student Dashboard</h1>
+                <p class="text-muted">Welcome back, {{ session.User.Username }}!</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>My Courses</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Python Programming 101</h5>
+                                    <small class="text-muted">70% Complete</small>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar" role="progressbar" style="width: 70%;" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </a>
+
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Web Development Basics</h5>
+                                    <small class="text-muted">45% Complete</small>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: 45%;" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </a>
+
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Database Design</h5>
+                                    <small class="text-muted">85% Complete</small>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary mr-2">View All Courses</a>
+                        <a href="{{ url_for('profile', ID=session.User.ID) }}" class="btn btn-info mr-2">My Profile</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
