@@ -144,10 +144,24 @@ def admin_dashboard():
     )
 
 
+@app.route("/admin-puzzles/")
+@login_required
+def admin_puzzles():
+    if session.get("User", {}).get("Username") != "admin":
+        return redirect(url_for("login"))
+    return render_template("puzzles.html")
+
+
 @app.route("/student-dashboard/")
 @login_required
 def student_dashboard():
     return render_template("student_dashboard.html")
+
+
+@app.route("/student-puzzles/")
+@login_required
+def student_puzzles():
+    return render_template("student_puzzles.html")
 
 
 @app.route("/register/", methods=["GET", "POST"])

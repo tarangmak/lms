@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    LMS - Student Puzzle Challenge
+{% endblock title %}
+
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">LMS - Student</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_dashboard') }}">Dashboard</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('student_puzzles') }}">Puzzles <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul class="navbar-nav navbar-right">
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger" role="button">Logout</a>
+            </ul>
+        </div>
+    </nav>
+{% endblock navbar %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-12 text-center">
+                <h1>Student Puzzle Challenge</h1>
+                <p class="text-muted">Sharpen your mind by solving these puzzles step by step!</p>
+                <button id="startBtn" class="btn btn-success btn-lg">Start Solving</button>
+            </div>
+        </div>
+
+        <div id="puzzleContainer" class="row" style="display: none;">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 id="puzzleTitle">Puzzle 1</h5>
+                    </div>
+                    <div class="card-body">
+                        <p id="puzzleQuestion">Question here</p>
+                        <input type="text" id="answerInput" class="form-control mb-3" placeholder="Enter your answer">
+                        <button id="nextBtn" class="btn btn-primary">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsContainer" class="row" style="display: none;">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Correct Answers:</h6>
+                        <ul id="answersList"></ul>
+                        <p class="text-success mt-3">Great effort! Keep practicing to improve your skills!</p>
+                        <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const puzzles = [
+            { question: "What is the next number in the sequence: 2, 6, 12, 20, ?", answer: "30" },
+            { question: "If 3x + 5 = 20, what is x?", answer: "5" },
+            { question: "What is the sum of first 10 natural numbers?", answer: "55" },
+            { question: "A number doubled is 50. What is the number?", answer: "25" },
+            { question: "What is 7 factorial (7!)?", answer: "5040" }
+        ];
+
+        let currentPuzzle = 0;
+
+        document.getElementById('startBtn').addEventListener('click', function() {
+            document.getElementById('startBtn').parentElement.style.display = 'none';
+            document.getElementById('puzzleContainer').style.display = 'block';
+            showPuzzle(currentPuzzle);
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            currentPuzzle++;
+            if (currentPuzzle < puzzles.length) {
+                showPuzzle(currentPuzzle);
+            } else {
+                showResults();
+            }
+        });
+
+        function showPuzzle(index) {
+            document.getElementById('puzzleTitle').textContent = `Puzzle ${index + 1}`;
+            document.getElementById('puzzleQuestion').textContent = puzzles[index].question;
+            document.getElementById('answerInput').value = '';
+        }
+
+        function showResults() {
+            document.getElementById('puzzleContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+            const answersList = document.getElementById('answersList');
+            answersList.innerHTML = '';
+            puzzles.forEach((puzzle, index) => {
+                const li = document.createElement('li');
+                li.textContent = `Puzzle ${index + 1}: ${puzzle.answer}`;
+                answersList.appendChild(li);
+            });
+        }
+    </script>
+{% endblock content %}
