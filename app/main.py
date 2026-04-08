@@ -203,11 +203,14 @@ def admin_analytics():
     if success and user_list:
         for user in user_list:
             name = f"{user.get('First Name', 'Unknown')} {user.get('Last Name', 'User')}"
-            # Generate dummy performance data since DB doesn't have it
-            solved = random.randint(0, 5)
-            completion = random.randint(0, 100)
+            solved = user.get('solved', None)
+            completion = user.get('completion', None)
+            if solved is None:
+                solved = 0
+            if completion is None:
+                completion = random.randint(0, 100)
             students.append({
-                "name": name,
+                "name": name.strip(),
                 "solved": solved,
                 "completion": completion
             })
@@ -218,13 +221,28 @@ def admin_analytics():
             {"name": "Priya", "solved": 4, "completion": 90},
             {"name": "Aman", "solved": 5, "completion": 100}
         ]
-    
-    # Calculate metrics for each student
+
+    # Ensure there is at least one data point
+    if not students:
+        students = [{"name": "No Data", "solved": 0, "completion": 0, "accuracy": 0, "skill": "Beginner"}]
+
+    # Calculate metrics for each student safely
     for student in students:
-        solved = student["solved"]
+        solved = student.get("solved", 0) or 0
+        completion = student.get("completion", 0) or 0
+        if solved < 0:
+            solved = 0
+        if solved > 5:
+            solved = 5
+        student["solved"] = solved
+        student["completion"] = completion
         student["accuracy"] = (solved / 5) * 100
         student["skill"] = get_skill_level(solved)
-    
+
+    # Ensure there is at least one data point before plotting
+    if not students:
+        students = [{"name": "No Data", "solved": 0, "completion": 0, "accuracy": 0, "skill": "Beginner"}]
+
     # Generate graphs
     try:
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -235,9 +253,18 @@ def admin_analytics():
         accuracy_chart_path = os.path.join(static_path, 'accuracy_chart.png')
         skill_chart_path = os.path.join(static_path, 'skill_chart.png')
 
+        # Prepare safe plotting data
+        names = [student.get("name", "Unknown") or "Unknown" for student in students]
+        accuracies = [student.get("accuracy", 0) or 0 for student in students]
+        skills = [student.get("skill", "Beginner") or "Beginner" for student in students]
+
+        if len(names) == 0 or len(accuracies) == 0:
+            students = [{"name": "No Data", "accuracy": 0, "skill": "Beginner"}]
+            names = ["No Data"]
+            accuracies = [0]
+            skills = ["Beginner"]
+
         # Bar chart for accuracy
-        names = [s["name"] for s in students]
-        accuracies = [s["accuracy"] for s in students]
         plt.clf()
         plt.figure(figsize=(8, 4))
         plt.bar(names, accuracies, color='skyblue')
@@ -248,28 +275,30 @@ def admin_analytics():
         plt.tight_layout()
         plt.savefig(accuracy_chart_path)
         plt.close()
-        
+
         # Pie chart for skill levels
         skill_counts = {}
-        for s in students:
-            skill = s["skill"]
+        for skill in skills:
             skill_counts[skill] = skill_counts.get(skill, 0) + 1
         labels = list(skill_counts.keys())
         sizes = list(skill_counts.values())
+        if not labels or not sizes:
+            labels = ["Beginner"]
+            sizes = [1]
         colors = ['lightcoral', 'lightskyblue', 'lightgreen']
         plt.clf()
         plt.figure(figsize=(6, 6))
-        plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+        plt.pie(sizes, labels=labels, colors=colors[:len(labels)], autopct='%1.1f%%', startangle=140)
         plt.title('Skill Level Distribution')
         plt.axis('equal')
         plt.tight_layout()
         plt.savefig(skill_chart_path)
         plt.close()
-        
+
         accuracy_chart = 'accuracy_chart.png'
         skill_chart = 'skill_chart.png'
-    except Exception:
-        # Fallback if matplotlib fails
+    except Exception as e:
+        print("Chart error:", e)
         accuracy_chart = None
         skill_chart = None
     
