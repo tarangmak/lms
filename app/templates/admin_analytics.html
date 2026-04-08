@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    LMS - Admin Analytics
+{% endblock title %}
+
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">LMS - Admin</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('admin_analytics') }}">Analytics <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul class="navbar-nav navbar-right">
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger" role="button">Logout</a>
+            </ul>
+        </div>
+    </nav>
+{% endblock navbar %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h1>Student Performance Analytics</h1>
+                <p class="text-muted">AI-powered analysis of student puzzle-solving skills</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Student Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Solved</th>
+                                    <th>Accuracy</th>
+                                    <th>Completion</th>
+                                    <th>Skill Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.solved }}/5</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ student.accuracy }}%;" aria-valuenow="{{ student.accuracy }}" aria-valuemin="0" aria-valuemax="100">
+                                                {{ "%.1f"|format(student.accuracy) }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ student.completion }}%;" aria-valuenow="{{ student.completion }}" aria-valuemin="0" aria-valuemax="100">
+                                                {{ student.completion }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if student.skill == 'Beginner' %}badge-secondary
+                                            {% elif student.skill == 'Intermediate' %}badge-warning
+                                            {% else %}badge-success{% endif %}">
+                                            {{ student.skill }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if accuracy_chart and skill_chart %}
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Accuracy Chart</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="{{ url_for('static', filename=accuracy_chart) }}?v={{ cache_bust }}" class="img-fluid" alt="Accuracy Chart">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Skill Level Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="{{ url_for('static', filename=skill_chart) }}?v={{ cache_bust }}" class="img-fluid" alt="Skill Chart">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock content %}

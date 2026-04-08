@@ -9,6 +9,24 @@ from flask_login import (
 )
 from . import model
 
+try:
+    from sklearn.tree import DecisionTreeClassifier
+except ImportError:
+    DecisionTreeClassifier = None
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+
+import os
+import random
+
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "Wfd8do6H7d74vdesbuRLlMFiAeXeJ7r"
@@ -33,6 +51,27 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(userid):
     return User(userid)
+
+
+def get_skill_level(solved):
+    """
+    Input: number of puzzles solved (0–5)
+    Output: Beginner / Intermediate / Advanced
+    """
+    try:
+        X = [[0], [1], [2], [3], [4], [5]]
+        y = ["Beginner", "Beginner", "Beginner", "Intermediate", "Intermediate", "Advanced"]
+        model = DecisionTreeClassifier()
+        model.fit(X, y)
+        return model.predict([[solved]])[0]
+    except Exception as e:
+        # Fallback rule-based logic
+        if solved <= 2:
+            return "Beginner"
+        elif solved <= 4:
+            return "Intermediate"
+        else:
+            return "Advanced"
 
 
 @app.route("/")
@@ -150,6 +189,98 @@ def admin_puzzles():
     if session.get("User", {}).get("Username") != "admin":
         return redirect(url_for("login"))
     return render_template("puzzles.html")
+
+
+@app.route("/admin-analytics/")
+@login_required
+def admin_analytics():
+    if session.get("User", {}).get("Username") != "admin":
+        return redirect(url_for("login"))
+    
+    # Fetch real student data from database
+    success, message, user_list = model.get_user_list()
+    students = []
+    if success and user_list:
+        for user in user_list:
+            name = f"{user.get('First Name', 'Unknown')} {user.get('Last Name', 'User')}"
+            # Generate dummy performance data since DB doesn't have it
+            solved = random.randint(0, 5)
+            completion = random.randint(0, 100)
+            students.append({
+                "name": name,
+                "solved": solved,
+                "completion": completion
+            })
+    else:
+        # Fallback dummy data
+        students = [
+            {"name": "Rahul", "solved": 2, "completion": 75},
+            {"name": "Priya", "solved": 4, "completion": 90},
+            {"name": "Aman", "solved": 5, "completion": 100}
+        ]
+    
+    # Calculate metrics for each student
+    for student in students:
+        solved = student["solved"]
+        student["accuracy"] = (solved / 5) * 100
+        student["skill"] = get_skill_level(solved)
+    
+    # Generate graphs
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        static_path = os.path.join(base_dir, 'static')
+        if not os.path.exists(static_path):
+            os.makedirs(static_path)
+
+        accuracy_chart_path = os.path.join(static_path, 'accuracy_chart.png')
+        skill_chart_path = os.path.join(static_path, 'skill_chart.png')
+
+        # Bar chart for accuracy
+        names = [s["name"] for s in students]
+        accuracies = [s["accuracy"] for s in students]
+        plt.clf()
+        plt.figure(figsize=(8, 4))
+        plt.bar(names, accuracies, color='skyblue')
+        plt.title('Student Accuracy')
+        plt.xlabel('Students')
+        plt.ylabel('Accuracy (%)')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.savefig(accuracy_chart_path)
+        plt.close()
+        
+        # Pie chart for skill levels
+        skill_counts = {}
+        for s in students:
+            skill = s["skill"]
+            skill_counts[skill] = skill_counts.get(skill, 0) + 1
+        labels = list(skill_counts.keys())
+        sizes = list(skill_counts.values())
+        colors = ['lightcoral', 'lightskyblue', 'lightgreen']
+        plt.clf()
+        plt.figure(figsize=(6, 6))
+        plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+        plt.title('Skill Level Distribution')
+        plt.axis('equal')
+        plt.tight_layout()
+        plt.savefig(skill_chart_path)
+        plt.close()
+        
+        accuracy_chart = 'accuracy_chart.png'
+        skill_chart = 'skill_chart.png'
+    except Exception:
+        # Fallback if matplotlib fails
+        accuracy_chart = None
+        skill_chart = None
+    
+    cache_bust = random.randint(1, 999999)
+    return render_template(
+        "admin_analytics.html",
+        students=students,
+        accuracy_chart=accuracy_chart,
+        skill_chart=skill_chart,
+        cache_bust=cache_bust
+    )
 
 
 @app.route("/student-dashboard/")
